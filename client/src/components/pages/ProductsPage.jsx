@@ -16,8 +16,8 @@ const ProductsPage = () => {
   // Fetch categories from backend
   useEffect(() => {
     setLoading(true);
-    // eslint-disable-next-line no-undef
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    // Use Vite env variables
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
     fetch(`${backendUrl}/api/categories`)
       .then(res => res.json())
       .then(data => setCategories(data))
@@ -32,8 +32,8 @@ const ProductsPage = () => {
 
     const categoryParam = searchParams.get('category');
     const searchParam = searchParams.get('search');
-    // eslint-disable-next-line no-undef
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    // Use Vite env variables
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
     let url = `${backendUrl}/api/products?`;
 
     if (categoryParam) {

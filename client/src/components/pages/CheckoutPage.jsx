@@ -5,9 +5,6 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 
-// eslint-disable-next-line no-undef
-const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
-
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
@@ -83,7 +80,7 @@ const CheckoutPage = () => {
         zip: user.zip || ''
       }));
     }
-  }, [cartItems.length, navigate, user]); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems.length, navigate, user, deliveryDates, deliveryTimeSlots]); // eslint-disable-next-line react-hooks/exhaustive-deps
 
   const validateDeliveryInfo = () => {
     const newErrors = {};
@@ -135,6 +132,9 @@ const CheckoutPage = () => {
       window.scrollTo(0, 0);
     }
   };
+
+  // Use Vite env variables for backend URL
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
 
   const handlePlaceOrder = async () => {
     if (!user) {

@@ -11,8 +11,8 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // eslint-disable-next-line no-undef
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    // Use Vite env variables
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
     try {
       const res = await fetch(`${backendUrl}/api/auth/forgot-password`, {
         method: 'POST',

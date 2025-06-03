@@ -36,8 +36,8 @@ const ProductDetailPage = () => {
   useEffect(() => {
     if (!id || id === "undefined") return;
     setLoading(true);
-    // eslint-disable-next-line no-undef
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    // Use Vite env variables
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
     fetch(`${backendUrl}/api/products/${id}`)
       .then(res => res.json())
       .then(data => {
@@ -71,8 +71,8 @@ const ProductDetailPage = () => {
   useEffect(() => {
     // Check if product is in wishlist on mount
     if (user && product?._id) {
-      // eslint-disable-next-line no-undef
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+      // Use Vite env variables
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
       fetch(`${backendUrl}/api/wishlist/${user._id || user.id}`)
         .then(res => res.json())
         .then(data => {
@@ -100,8 +100,8 @@ const ProductDetailPage = () => {
       toast.error('Please log in to add to wishlist.');
       return;
     }
-    // eslint-disable-next-line no-undef
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    // Use Vite env variables
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
     try {
       const res = await fetch(`${backendUrl}/api/wishlist/${user._id || user.id}`, {
         method: isWishlisted ? 'DELETE' : 'POST',

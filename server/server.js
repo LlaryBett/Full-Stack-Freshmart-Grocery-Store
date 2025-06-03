@@ -9,7 +9,7 @@ dotenv.config();
 // Enable CORS
 app.use(cors({
   origin: [
-    process.env.CLIENT_URL || 'http://localhost:3000',
+    process.env.CLIENT_URL || 'http://localhost:5000',
     process.env.VERCEL_CLIENT_URL || 'https://full-stack-freshmart-grocery-store.vercel.app/'
   ],
   credentials: true

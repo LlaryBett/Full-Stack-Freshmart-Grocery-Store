@@ -18,7 +18,7 @@ import { toast } from 'react-hot-toast';
 
 const AccountPage = () => {
   // eslint-disable-next-line no-undef
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, login } = useAuth();

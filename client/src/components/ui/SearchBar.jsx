@@ -16,7 +16,8 @@ const SearchBar = ({ onClose, isScrolled }) => {
   useEffect(() => {
     if (query.length > 1) {
       // eslint-disable-next-line no-undef
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+      // Use Vite env variables
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
       fetch(`${backendUrl}/api/products?search=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .then(data => {

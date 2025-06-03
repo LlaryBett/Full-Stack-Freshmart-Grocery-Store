@@ -17,8 +17,7 @@ const Header = ({ toggleCart, toggleMobileMenu }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // When you need to fetch or reference the backend URL, use:
-  // eslint-disable-next-line no-undef
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
   // Example usage:
   // fetch(`${backendUrl}/api/some-endpoint`)
 
