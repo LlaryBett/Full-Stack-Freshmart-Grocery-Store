@@ -16,6 +16,10 @@ const ResetPassword = () => {
       toast.error('Passwords do not match');
       return;
     }
+    if (!token || token === "undefined") {
+      toast.error('Invalid or missing reset token.');
+      return;
+    }
     setLoading(true);
     // Use Vite env variables
     const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
