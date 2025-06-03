@@ -5,6 +5,9 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 
+// eslint-disable-next-line no-undef
+const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
@@ -140,7 +143,7 @@ const CheckoutPage = () => {
     }
     setPlacingOrder(true);
     try {
-      const res = await fetch('http://localhost:5000/api/orders', {
+      const res = await fetch(`${backendUrl}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user._id || user.id })

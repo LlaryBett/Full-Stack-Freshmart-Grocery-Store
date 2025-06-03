@@ -15,8 +15,9 @@ const SearchBar = ({ onClose, isScrolled }) => {
 
   useEffect(() => {
     if (query.length > 1) {
-      // Fetch from backend instead of using mock data
-      fetch(`http://localhost:5000/api/products?search=${encodeURIComponent(query)}`)
+      // eslint-disable-next-line no-undef
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+      fetch(`${backendUrl}/api/products?search=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .then(data => {
           setSearchResults(Array.isArray(data) ? data.slice(0, 5) : []);

@@ -36,13 +36,15 @@ const ProductDetailPage = () => {
   useEffect(() => {
     if (!id || id === "undefined") return;
     setLoading(true);
-    fetch(`http://localhost:5000/api/products/${id}`)
+    // eslint-disable-next-line no-undef
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    fetch(`${backendUrl}/api/products/${id}`)
       .then(res => res.json())
       .then(data => {
         setProduct(data);
         document.title = `${data.name} - FreshMart`;
         if (data.category) {
-          return fetch(`http://localhost:5000/api/products?category=${encodeURIComponent(data.category)}`);
+          return fetch(`${backendUrl}/api/products?category=${encodeURIComponent(data.category)}`);
         } else {
           setRelatedProducts([]);
           setLoading(false);
@@ -69,7 +71,9 @@ const ProductDetailPage = () => {
   useEffect(() => {
     // Check if product is in wishlist on mount
     if (user && product?._id) {
-      fetch(`http://localhost:5000/api/wishlist/${user._id || user.id}`)
+      // eslint-disable-next-line no-undef
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+      fetch(`${backendUrl}/api/wishlist/${user._id || user.id}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data.items) && data.items.some(item => item._id === product._id)) {
@@ -96,8 +100,10 @@ const ProductDetailPage = () => {
       toast.error('Please log in to add to wishlist.');
       return;
     }
+    // eslint-disable-next-line no-undef
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
     try {
-      const res = await fetch(`http://localhost:5000/api/wishlist/${user._id || user.id}`, {
+      const res = await fetch(`${backendUrl}/api/wishlist/${user._id || user.id}`, {
         method: isWishlisted ? 'DELETE' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: product._id })

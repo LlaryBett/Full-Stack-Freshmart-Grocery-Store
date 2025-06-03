@@ -17,6 +17,8 @@ import { useCart } from '../context/CartContext';
 import { toast } from 'react-hot-toast';
 
 const AccountPage = () => {
+  // eslint-disable-next-line no-undef
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, login } = useAuth();
@@ -73,7 +75,7 @@ const AccountPage = () => {
   useEffect(() => {
     if (activeTab === 'orders' && user) {
       setOrdersLoading(true);
-      fetch(`http://localhost:5000/api/orders/user/${user._id || user.id}`)
+      fetch(`${backendUrl}/api/orders/user/${user._id || user.id}`)
         .then(res => res.json())
         .then(data => setOrders(Array.isArray(data) ? data : []))
         .catch(() => {
@@ -82,13 +84,13 @@ const AccountPage = () => {
         })
         .finally(() => setOrdersLoading(false));
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, backendUrl]);
 
   // Fetch wishlist when wishlist tab is active
   useEffect(() => {
     if (activeTab === 'wishlist' && user) {
       setWishlistLoading(true);
-      fetch(`http://localhost:5000/api/wishlist/${user._id || user.id}`)
+      fetch(`${backendUrl}/api/wishlist/${user._id || user.id}`)
         .then(res => res.json())
         .then(data => setWishlist(Array.isArray(data.items) ? data.items : []))
         .catch(() => {
@@ -97,13 +99,13 @@ const AccountPage = () => {
         })
         .finally(() => setWishlistLoading(false));
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, backendUrl]);
 
   // Fetch addresses when addresses tab is active
   useEffect(() => {
     if (activeTab === 'addresses' && user) {
       setAddressesLoading(true);
-      fetch(`http://localhost:5000/api/addresses/${user._id || user.id}`)
+      fetch(`${backendUrl}/api/addresses/${user._id || user.id}`)
         .then(res => res.json())
         .then(data => setAddresses(Array.isArray(data) ? data : []))
         .catch(() => {
@@ -112,13 +114,13 @@ const AccountPage = () => {
         })
         .finally(() => setAddressesLoading(false));
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, backendUrl]);
 
   // Fetch notifications when notifications tab is active
   useEffect(() => {
     if (activeTab === 'notifications' && user) {
       setNotificationsLoading(true);
-      fetch(`http://localhost:5000/api/notifications/${user._id || user.id}`)
+      fetch(`${backendUrl}/api/notifications/${user._id || user.id}`)
         .then(res => res.json())
         .then(data => setNotifications(Array.isArray(data) ? data : []))
         .catch(() => {
@@ -127,7 +129,7 @@ const AccountPage = () => {
         })
         .finally(() => setNotificationsLoading(false));
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, backendUrl]);
 
   const handleLoginChange = e => {
     setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
@@ -138,7 +140,7 @@ const AccountPage = () => {
     setLoginLoading(true);
     setLoginError('');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${backendUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm)
@@ -178,7 +180,7 @@ const AccountPage = () => {
     e.preventDefault();
     setAddressFormLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/addresses/${user._id || user.id}`, {
+      const res = await fetch(`${backendUrl}/api/addresses/${user._id || user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(addressForm)
@@ -223,7 +225,7 @@ const AccountPage = () => {
     e.preventDefault();
     setAddressFormLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/addresses/${user._id || user.id}/${editAddressId}`, {
+      const res = await fetch(`${backendUrl}/api/addresses/${user._id || user.id}/${editAddressId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(addressForm)
@@ -637,7 +639,7 @@ const AccountPage = () => {
                                   onClick={async () => {
                                     // Remove from wishlist
                                     try {
-                                      await fetch(`http://localhost:5000/api/wishlist/${user._id || user.id}`, {
+                                      await fetch(`${backendUrl}/api/wishlist/${user._id || user.id}`, {
                                         method: 'DELETE',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ productId: product._id || product.id })
@@ -816,11 +818,11 @@ const AccountPage = () => {
                                 onClick={async () => {
                                   // Set as default
                                   try {
-                                    await fetch(`http://localhost:5000/api/addresses/${user._id || user.id}/${address._id}/default`, {
+                                    await fetch(`${backendUrl}/api/addresses/${user._id || user.id}/${address._id}/default`, {
                                       method: 'PUT'
                                     });
                                     // Refresh addresses
-                                    const res = await fetch(`http://localhost:5000/api/addresses/${user._id || user.id}`);
+                                    const res = await fetch(`${backendUrl}/api/addresses/${user._id || user.id}`);
                                     const data = await res.json();
                                     setAddresses(Array.isArray(data) ? data : []);
                                     toast.success('Set as default address');
@@ -837,7 +839,7 @@ const AccountPage = () => {
                               onClick={async () => {
                                 // Delete address
                                 try {
-                                  await fetch(`http://localhost:5000/api/addresses/${user._id || user.id}/${address._id}`, {
+                                  await fetch(`${backendUrl}/api/addresses/${user._id || user.id}/${address._id}`, {
                                     method: 'DELETE'
                                   });
                                   setAddresses(addresses.filter(a => a._id !== address._id));
@@ -1037,7 +1039,7 @@ const AccountPage = () => {
                                     className="ml-4 text-green-500 hover:underline text-xs"
                                     onClick={async () => {
                                       try {
-                                        await fetch(`http://localhost:5000/api/notifications/${user._id || user.id}/${n._id}/read`, {
+                                        await fetch(`${backendUrl}/api/notifications/${user._id || user.id}/${n._id}/read`, {
                                           method: 'PUT'
                                         });
                                         setNotifications(notifications.map(x =>

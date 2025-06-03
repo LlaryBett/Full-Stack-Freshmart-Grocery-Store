@@ -8,7 +8,9 @@ const FeaturedProducts = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products?sort=featured')
+    // eslint-disable-next-line no-undef
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    fetch(`${backendUrl}/api/products?sort=featured`)
       .then(res => res.json())
       .then(data => {
         // Filter for featured products and limit to 8

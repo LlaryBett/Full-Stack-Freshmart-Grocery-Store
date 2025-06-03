@@ -16,6 +16,12 @@ const Header = ({ toggleCart, toggleMobileMenu }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
+  // When you need to fetch or reference the backend URL, use:
+  // eslint-disable-next-line no-undef
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+  // Example usage:
+  // fetch(`${backendUrl}/api/some-endpoint`)
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -28,14 +34,14 @@ const Header = ({ toggleCart, toggleMobileMenu }) => {
   useEffect(() => {
     // Fetch wishlist count when user changes
     if (user) {
-      fetch(`http://localhost:5000/api/wishlist/${user._id || user.id}`)
+      fetch(`${backendUrl}/api/wishlist/${user._id || user.id}`)
         .then(res => res.json())
         .then(data => setWishlistCount(Array.isArray(data.items) ? data.items.length : 0))
         .catch(() => setWishlistCount(0));
     } else {
       setWishlistCount(0);
     }
-  }, [user]);
+  }, [user, backendUrl]);
 
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -66,7 +72,7 @@ const Header = ({ toggleCart, toggleMobileMenu }) => {
     navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
     // This is a frontend route, not a backend endpoint.
     // The actual backend endpoint called will be something like:
-    // http://localhost:5000/api/products?search=yourSearchTerm
+    
     setIsSearchOpen(false);
   };
 

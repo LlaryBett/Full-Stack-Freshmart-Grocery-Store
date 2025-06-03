@@ -8,7 +8,9 @@ const FeaturedCategories = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/categories')
+    // eslint-disable-next-line no-undef
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    fetch(`${backendUrl}/api/categories`)
       .then(res => res.json())
       .then(data => {
         setCategories(data);

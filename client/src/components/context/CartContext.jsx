@@ -38,7 +38,9 @@ const CartProvider = ({ children }) => {
     });
     // Sync with backend
     try {
-      await fetch(`http://localhost:5000/api/cart/${user._id || user.id}`, {
+      // eslint-disable-next-line no-undef
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+      await fetch(`${backendUrl}/api/cart/${user._id || user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

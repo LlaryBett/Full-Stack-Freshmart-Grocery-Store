@@ -16,7 +16,9 @@ const ProductsPage = () => {
   // Fetch categories from backend
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/api/categories')
+    // eslint-disable-next-line no-undef
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    fetch(`${backendUrl}/api/categories`)
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(() => setCategories([]));
@@ -30,7 +32,9 @@ const ProductsPage = () => {
 
     const categoryParam = searchParams.get('category');
     const searchParam = searchParams.get('search');
-    let url = 'http://localhost:5000/api/products?';
+    // eslint-disable-next-line no-undef
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_CLIENT_URL;
+    let url = `${backendUrl}/api/products?`;
 
     if (categoryParam) {
       url += `category=${encodeURIComponent(categoryParam)}`;

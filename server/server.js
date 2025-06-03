@@ -1,9 +1,19 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import app from './src/app.js';
+import cors from 'cors'; // Add this line
 
 // Load environment variables
 dotenv.config();
+
+// Enable CORS
+app.use(cors({
+  origin: [
+    process.env.CLIENT_URL || 'http://localhost:3000',
+    process.env.VERCEL_CLIENT_URL || 'https://full-stack-freshmart-grocery-store.vercel.app/'
+  ],
+  credentials: true
+}));
 
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI;  // Changed from MONGODB_URI to MONGO_URI
