@@ -1,0 +1,7 @@
+# Ignore environment variables
+.env
+
+# Ignore node_modules for frontend
+client/node_modules/
+# If you have a backend, also ignore its node_modules
+server/node_modules/
