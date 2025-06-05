@@ -6,7 +6,7 @@ import Loader from '../common/Loader';
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]); // Initialize as empty array
   const [categories, setCategories] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 100]);
   const [sortBy, setSortBy] = useState('featured');
@@ -32,7 +32,6 @@ const ProductsPage = () => {
 
     const categoryParam = searchParams.get('category');
     const searchParam = searchParams.get('search');
-    // Use Vite env variables
     const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
     let url = `${backendUrl}/api/products?`;
 
@@ -52,10 +51,13 @@ const ProductsPage = () => {
     fetch(url)
       .then(res => res.json())
       .then(data => {
-        setFilteredProducts(data);
+        // Handle both array and paginated object response
+        const products = Array.isArray(data) ? data : data.products || [];
+        setFilteredProducts(products);
         setLoading(false);
       })
-      .catch(() => {
+      .catch(error => {
+        console.error('Error fetching products:', error);
         setFilteredProducts([]);
         setLoading(false);
       });

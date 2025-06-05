@@ -13,11 +13,14 @@ const FeaturedProducts = () => {
     fetch(`${backendUrl}/api/products?sort=featured`)
       .then(res => res.json())
       .then(data => {
-        // Filter for featured products and limit to 8
-        setFeaturedProducts(data.filter(p => p.featured).slice(0, 8));
+        // Handle paginated response
+        const products = data.products || [];
+        // Filter featured products and limit to 8
+        setFeaturedProducts(products.filter(p => p.featured).slice(0, 8));
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Error fetching featured products:', error);
         setFeaturedProducts([]);
         setLoading(false);
       });
