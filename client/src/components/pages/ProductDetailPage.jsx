@@ -20,6 +20,7 @@ import ProductCard from '../products/ProductCard';
 import Loader from '../common/Loader';
 
 const ProductDetailPage = () => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -29,6 +30,12 @@ const ProductDetailPage = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    comment: ''
+  });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -113,6 +120,42 @@ const ProductDetailPage = () => {
       toast.success(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
     } catch {
       toast.error('Could not update wishlist');
+    }
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please login to write a review');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(`${backendUrl}/api/products/${id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating: reviewForm.rating,
+          comment: reviewForm.comment,
+          user: user.firstName + ' ' + user.lastName
+        })
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to submit review');
+      }
+
+      const updatedProduct = await res.json();
+      setProduct(updatedProduct);
+      setShowReviewModal(false);
+      setReviewForm({ rating: 5, comment: '' });
+      toast.success('Review submitted successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -425,7 +468,10 @@ const ProductDetailPage = () => {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold">Customer Reviews</h3>
-                  <button className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors">
+                  <button 
+                    onClick={() => setShowReviewModal(true)}
+                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors"
+                  >
                     Write a Review
                   </button>
                 </div>
@@ -462,6 +508,63 @@ const ProductDetailPage = () => {
                     <div className="text-gray-500">No reviews yet.</div>
                   )}
                 </div>
+
+                {/* Review Modal */}
+                {showReviewModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black opacity-50" onClick={() => setShowReviewModal(false)}></div>
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md relative z-10">
+                      <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
+                      <form onSubmit={handleSubmitReview}>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
+                                className="text-yellow-400 focus:outline-none"
+                              >
+                                <Star
+                                  size={24}
+                                  fill={star <= reviewForm.rating ? 'currentColor' : 'none'}
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+                          <textarea
+                            value={reviewForm.comment}
+                            onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                            rows={4}
+                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Share your thoughts about this product..."
+                            required
+                          ></textarea>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setShowReviewModal(false)}
+                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={submittingReview}
+                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                          >
+                            {submittingReview ? 'Submitting...' : 'Submit Review'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

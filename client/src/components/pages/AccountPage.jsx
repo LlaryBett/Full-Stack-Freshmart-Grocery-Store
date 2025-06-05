@@ -55,6 +55,7 @@ const AccountPage = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     // Scroll to top when the component mounts
@@ -122,14 +123,32 @@ const AccountPage = () => {
       setNotificationsLoading(true);
       fetch(`${backendUrl}/api/notifications/${user._id || user.id}`)
         .then(res => res.json())
-        .then(data => setNotifications(Array.isArray(data) ? data : []))
+        .then(data => {
+          const notifs = Array.isArray(data) ? data : [];
+          setNotifications(notifs);
+          setUnreadNotifications(notifs.filter(n => !n.read).length);
+        })
         .catch(() => {
           setNotifications([]);
+          setUnreadNotifications(0);
           toast.error('Failed to load notifications');
         })
         .finally(() => setNotificationsLoading(false));
     }
   }, [activeTab, user, backendUrl]);
+
+  // Also fetch unread count when not on notifications tab
+  useEffect(() => {
+    if (user) {
+      fetch(`${backendUrl}/api/notifications/${user._id || user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          const notifs = Array.isArray(data) ? data : [];
+          setUnreadNotifications(notifs.filter(n => !n.read).length);
+        })
+        .catch(() => setUnreadNotifications(0));
+    }
+  }, [user, backendUrl]);
 
   const handleLoginChange = e => {
     setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
@@ -153,9 +172,14 @@ const AccountPage = () => {
         return;
       }
       // Call AuthContext login with the user data from backend
-      login(data.user); // <-- this will trigger the console.log in AuthContext
+      login(data.user);
       toast.success('Login successful!');
-      window.location.href = '/';
+      // Redirect based on role
+      if (data.user && data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/account');
+      }
     } catch {
       setLoginError('Network error');
       toast.error('Network error');
@@ -434,8 +458,26 @@ const AccountPage = () => {
                           ? 'bg-green-50 text-green-600'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
+                      style={{ position: 'relative' }}
                     >
-                      <Bell size={18} className="mr-3" />
+                      <span className="relative mr-3 inline-block">
+                        <Bell size={18} />
+                        {unreadNotifications > 0 && (
+                          <span
+                            className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow"
+                            style={{
+                              fontSize: '0.75rem',
+                              minWidth: '1.25rem',
+                              minHeight: '1.25rem',
+                              lineHeight: '1.25rem',
+                              padding: 0,
+                              zIndex: 10
+                            }}
+                          >
+                            {unreadNotifications}
+                          </span>
+                        )}
+                      </span>
                       Notifications
                     </button>
                   </li>

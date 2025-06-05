@@ -1,11 +1,16 @@
-import { X, Minus, Plus, ShoppingCart, Heart, Share2 } from 'lucide-react';
+import { X, Minus, Plus, ShoppingCart, Heart, Share2, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const ProductQuickView = ({ product, isOpen, onClose }) => {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     if (isOpen) {
@@ -37,6 +42,36 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
   const increaseQuantity = () => {
     if (quantity < product.stock) {
       setQuantity(quantity + 1);
+    }
+  };
+
+  const handleRatingClick = async (rating) => {
+    if (!user) {
+      toast.error('Please login to rate this product');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${backendUrl}/api/products/${product._id}/rating`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating,
+          user: user.firstName + ' ' + user.lastName
+        })
+      });
+
+      if (!res.ok) throw new Error();
+
+      const updatedProduct = await res.json();
+      // Update the product's rating in the parent component
+      if (typeof product.onUpdate === 'function') {
+        product.onUpdate(updatedProduct);
+      }
+      toast.success('Rating submitted successfully');
+    } catch (error) {
+      console.error('Rating error:', error);
+      toast.error(error.message || 'Failed to submit rating');
     }
   };
 
@@ -75,14 +110,19 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
             {/* Rating */}
             <div className="flex items-center mb-4">
               <div className="flex text-yellow-400">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className={`w-4 h-4 ${i < product.rating ? 'fill-current' : 'text-gray-300'}`}
-                    viewBox="0 0 20 20"
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onMouseEnter={() => setHoveredRating(star)}
+                    onMouseLeave={() => setHoveredRating(0)}
+                    onClick={() => handleRatingClick(star)}
+                    className="p-1 hover:scale-110 transition-transform"
                   >
-                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                  </svg>
+                    <Star
+                      size={20}
+                      className={star <= (hoveredRating || product.rating) ? 'fill-current' : 'text-gray-300'}
+                    />
+                  </button>
                 ))}
               </div>
               <span className="ml-2 text-sm text-gray-500">

@@ -2,7 +2,18 @@ import Product from '../models/Product.js';
 
 export const getAllProducts = async (req, res) => {
   try {
-    const { category, minPrice, maxPrice, sort, search, inStock, onSale } = req.query;
+    const { 
+      category, 
+      minPrice, 
+      maxPrice, 
+      sort, 
+      search, 
+      inStock, 
+      onSale,
+      page = 1,
+      limit = 10 
+    } = req.query;
+
     let filter = {};
     let sortOption = {};
 
@@ -59,8 +70,28 @@ export const getAllProducts = async (req, res) => {
         break;
     }
 
-    const products = await Product.find(filter).sort(sortOption);
-    res.json(products);
+    // Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Get total count for pagination
+    const total = await Product.countDocuments(filter);
+
+    // Get paginated results
+    const products = await Product.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNum);
+
+    res.json({
+      products,
+      total,
+      currentPage: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+      hasMore: pageNum * limitNum < total
+    });
+
   } catch (error) {
     res.status(500).json({ message: 'Error fetching products' });
   }
@@ -120,26 +151,53 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-export const addProductReview = async (req, res) => {
+export const addReview = async (req, res) => {
   try {
+    const { id } = req.params;
     const { rating, comment, user } = req.body;
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    product.reviews.push({ user, rating, comment });
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
 
-    // Update average rating and count
+    // Add the new review
+    product.reviews.push({ rating, comment, user });
+
+    // Update average rating
+    const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0);
+    product.rating = totalRating / product.reviews.length;
     product.reviewsCount = product.reviews.length;
-    product.rating = product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length;
 
     await product.save();
-    res.status(201).json({
-      message: 'Review added',
-      reviews: product.reviews,
-      rating: product.rating,
-      reviewsCount: product.reviewsCount
-    });
+    res.status(201).json(product);
   } catch (error) {
-    res.status(400).json({ message: 'Error adding review' });
+    res.status(500).json({ message: 'Failed to add review' });
+  }
+};
+
+// Quick rating without comment
+export const addRating = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, user } = req.body;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Add rating as a review without comment
+    product.reviews.push({ rating, user, comment: `Rated ${rating} stars` });
+
+    // Update average rating
+    const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0);
+    product.rating = totalRating / product.reviews.length;
+    product.reviewsCount = product.reviews.length;
+
+    await product.save();
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to add rating' });
   }
 };

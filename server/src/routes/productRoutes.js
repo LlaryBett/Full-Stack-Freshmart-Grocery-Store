@@ -1,20 +1,22 @@
-import express from 'express';
+import { Router } from 'express';
 import {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
-  addProductReview
+  addReview,
+  addRating
 } from '../controllers/productController.js';
 
-const router = express.Router();
+const router = Router();
 
 router.get('/', getAllProducts);
 router.get('/:id', getProductById);
-router.post('/', createProduct); // Protect with admin middleware in production
-router.put('/:id', updateProduct); // Protect with admin middleware in production
-router.delete('/:id', deleteProduct); // Protect with admin middleware in production
-router.post('/:id/reviews', addProductReview); // POST /api/products/:id/reviews
+router.post('/', createProduct);
+router.put('/:id', updateProduct);
+router.delete('/:id', deleteProduct);
+router.post('/:id/reviews', addReview);
+router.post('/:id/rating', addRating);
 
 export default router;

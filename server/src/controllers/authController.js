@@ -76,7 +76,8 @@ export const login = async (req, res) => {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          phone: user.phone
+          phone: user.phone,
+          role: user.role // <-- include role
         }
       });
     } else {
@@ -88,7 +89,8 @@ export const login = async (req, res) => {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          phone: user.phone
+          phone: user.phone,
+          role: user.role // <-- include role
         }
       });
     }
@@ -100,7 +102,7 @@ export const login = async (req, res) => {
 
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password, confirmPassword } = req.body;
+    const { firstName, lastName, email, phone, password, confirmPassword, role } = req.body;
 
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -122,7 +124,8 @@ export const register = async (req, res) => {
       lastName,
       email,
       phone,
-      password
+      password,
+      role: role || 'user' // <-- allow role to be set, default to 'user'
     });
 
     await user.save();
@@ -140,7 +143,8 @@ export const register = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        role: user.role // <-- include role
       }
     });
   } catch (error) {
