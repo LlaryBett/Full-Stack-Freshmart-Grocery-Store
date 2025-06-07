@@ -2,14 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 
-// Only export CartProvider and useCart to comply with Fast Refresh
 const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
-  // Defensive: handle case where useAuth() returns undefined
   let user = null;
   try {
-    // useAuth() may throw if used outside AuthProvider
     const auth = useAuth();
     user = auth?.user || null;
   } catch {
@@ -18,28 +15,47 @@ const CartProvider = ({ children }) => {
 
   const [cartItems, setCartItems] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
+
+  // Always fetch cart from backend on mount and when user changes
+  const fetchCart = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch(`${backendUrl}/api/cart/${user._id || user.id}`);
+      const data = await res.json();
+      if (Array.isArray(data.items)) {
+        // Ensure each item has product, price, name, image, etc. for rendering
+        setCartItems(
+          data.items.map(item => ({
+            ...item,
+            price: item.product?.price ?? item.price ?? 0,
+            name: item.product?.name ?? item.name ?? '',
+            image: item.product?.image ?? item.image ?? '',
+            stock: item.product?.stock ?? item.stock ?? 99,
+            unit: item.product?.unit ?? item.unit ?? '',
+            category: item.product?.category ?? item.category ?? '',
+            product: item.product // keep original product ref for safety
+          }))
+        );
+      } else {
+        setCartItems([]);
+      }
+    } catch {
+      setCartItems([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCart();
+    // eslint-disable-next-line
+  }, [user]);
 
   const addToCart = async (product, quantity = 1) => {
     if (!user) {
       toast.error('Please log in to add items to your cart.');
       return;
     }
-    // Local update for instant feedback
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id || item._id === product._id);
-      if (existingItem) {
-        return prevItems.map(item =>
-          (item.id === product.id || item._id === product._id)
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      return [...prevItems, { ...product, quantity }];
-    });
-    // Sync with backend
     try {
-      // Use Vite env variables
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
       await fetch(`${backendUrl}/api/cart/${user._id || user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,29 +64,62 @@ const CartProvider = ({ children }) => {
           quantity
         })
       });
+      fetchCart();
     } catch {
       toast.error('Could not sync cart with server.');
     }
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+  const removeFromCart = async (productId) => {
+    if (!user) return;
+    try {
+      await fetch(`${backendUrl}/api/cart/${user._id || user.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      });
+      fetchCart();
+    } catch {
+      toast.error('Could not sync cart with server.');
+    }
   };
 
-  const updateQuantity = (productId, quantity) => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
-      )
-    );
+  const updateQuantity = async (productId, quantity) => {
+    if (!user) return;
+    // Defensive: get the correct productId from the cart item if undefined
+    if (!productId) {
+      toast.error('Invalid product ID for cart update.');
+      return;
+    }
+    try {
+      await fetch(`${backendUrl}/api/cart/${user._id || user.id}/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity })
+      });
+      fetchCart();
+    } catch {
+      toast.error('Could not sync cart with server.');
+    }
   };
 
-  const clearCart = () => {
-    setCartItems([]);
+  const clearCart = async () => {
+    if (!user) return;
+    try {
+      await fetch(`${backendUrl}/api/cart/${user._id || user.id}/clear`, {
+        method: 'DELETE'
+      });
+      fetchCart();
+    } catch {
+      toast.error('Could not sync cart with server.');
+    }
   };
 
   useEffect(() => {
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = cartItems.reduce(
+      (sum, item) => sum + ((item.price || (item.product?.price ?? 0)) * item.quantity),
+      0
+    );
     setCartTotal(total);
   }, [cartItems]);
 

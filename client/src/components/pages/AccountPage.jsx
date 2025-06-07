@@ -76,8 +76,15 @@ const AccountPage = () => {
   useEffect(() => {
     if (activeTab === 'orders' && user) {
       setOrdersLoading(true);
-      fetch(`${backendUrl}/api/orders/user/${user._id || user.id}`)
-        .then(res => res.json())
+      fetch(`${backendUrl}/api/orders/user/${user._id || user.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+        .then(res => {
+          if (res.status === 401) throw new Error('Unauthorized');
+          return res.json();
+        })
         .then(data => setOrders(Array.isArray(data) ? data : []))
         .catch(() => {
           setOrders([]);
@@ -171,8 +178,8 @@ const AccountPage = () => {
         setLoginLoading(false);
         return;
       }
-      // Call AuthContext login with the user data from backend
-      login(data.user);
+      // Call AuthContext login with the full response data (token and user)
+      login(data);
       toast.success('Login successful!');
       // Redirect based on role
       if (data.user && data.user.role === 'admin') {
@@ -612,7 +619,7 @@ const AccountPage = () => {
                                 {order.status}
                               </span>
                               <p className="text-sm text-gray-500 mt-1">
-                                Total: ${order.total.toFixed(2)}
+                                Total: ksh {typeof order.totals?.total === 'number' ? order.totals.total.toFixed(2) : '0.00'}
                               </p>
                             </div>
                           </div>

@@ -64,11 +64,11 @@ const CartPage = () => {
                 
                 <div className="divide-y divide-gray-100">
                   {cartItems.map(item => (
-                    <div key={item.id} className="p-4">
+                    <div key={item.product?._id || item.product?.id} className="p-4">
                       <CartItem 
                         item={item}
-                        onRemove={() => removeFromCart(item.id)}
-                        onUpdateQuantity={(qty) => updateQuantity(item.id, qty)}
+                        onRemove={() => removeFromCart(item.product?._id || item.product?.id)}
+                        onUpdateQuantity={(qty) => updateQuantity(item.product?._id || item.product?.id, qty)}
                       />
                     </div>
                   ))}

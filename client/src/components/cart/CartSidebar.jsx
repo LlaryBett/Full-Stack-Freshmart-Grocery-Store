@@ -27,7 +27,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end"
+      className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-[2px]"
       onClick={handleBackdropClick}
     >
       <div className="bg-white w-full max-w-md h-full overflow-hidden transform transition-transform duration-300 flex flex-col">
@@ -57,21 +57,22 @@ const CartSidebar = ({ isOpen, onClose }) => {
               </div>
               <h3 className="text-lg font-medium text-gray-700 mb-2">Your cart is empty</h3>
               <p className="text-gray-500 mb-6">Looks like you haven't added any products to your cart yet.</p>
-              <button 
+              <Link 
+                to="/products"
                 onClick={onClose}
                 className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors"
               >
                 Continue Shopping
-              </button>
+              </Link>
             </div>
           ) : (
             <div className="space-y-4">
               {cartItems.map(item => (
                 <CartItem 
-                  key={item.id}
+                  key={item.product?._id || item.product?.id}
                   item={item}
-                  onRemove={() => removeFromCart(item.id)}
-                  onUpdateQuantity={(qty) => updateQuantity(item.id, qty)}
+                  onRemove={() => removeFromCart(item.product?._id || item.product?.id)}
+                  onUpdateQuantity={(qty) => updateQuantity(item.product?._id || item.product?.id, qty)}
                 />
               ))}
               
@@ -119,12 +120,13 @@ const CartSidebar = ({ isOpen, onClose }) => {
             </Link>
             
             {/* Continue Shopping */}
-            <button 
+            <Link 
+              to="/products"
               onClick={onClose}
               className="block w-full text-center mt-3 text-gray-600 hover:text-gray-800"
             >
               Continue Shopping
-            </button>
+            </Link>
           </div>
         )}
       </div>

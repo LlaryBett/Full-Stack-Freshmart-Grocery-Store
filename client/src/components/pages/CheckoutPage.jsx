@@ -25,11 +25,11 @@ const CheckoutPage = () => {
   const [deliveryDate, setDeliveryDate] = useState('');
   const [deliveryTime, setDeliveryTime] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
-  const [placingOrder, setPlacingOrder] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   // Calculate order totals
-  const shipping = deliveryOption === 'express' ? 5.99 : 0;
+  const shipping = deliveryOption === 'express' ? 129 : 0;
   const tax = cartTotal * 0.1;
   const orderTotal = cartTotal + shipping + tax;
 
@@ -80,7 +80,7 @@ const CheckoutPage = () => {
         zip: user.zip || ''
       }));
     }
-  }, [cartItems.length, navigate, user, deliveryDates, deliveryTimeSlots]); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems.length, navigate, user]);
 
   const validateDeliveryInfo = () => {
     const newErrors = {};
@@ -133,34 +133,84 @@ const CheckoutPage = () => {
     }
   };
 
-  // Use Vite env variables for backend URL
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
-
   const handlePlaceOrder = async () => {
-    if (!user) {
-      toast.error('You must be logged in to place an order.');
+    if (!user || !(user._id || user.id)) {
+      toast.error('Please log in  to place an order!');
+      setIsLoading(false);
       return;
     }
-    setPlacingOrder(true);
+
+    setIsLoading(true);
+
     try {
-      const res = await fetch(`${backendUrl}/api/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user._id || user.id })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.message || 'Failed to place order');
-        setPlacingOrder(false);
-        return;
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
       }
-      clearCart();
+
+      // Use backendUrl here only
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
+      // --- Fetch latest cart from backend before placing order ---
+      const cartRes = await fetch(`${backendUrl}/api/cart/${user._id || user.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const cartData = await cartRes.json();
+      // DEBUG: Log backend cart data
+      console.log('Backend cartData:', cartData);
+
+      if (!cartData.items || cartData.items.length === 0) {
+        // DEBUG: Log frontend cartItems for comparison
+        console.log('Frontend cartItems:', cartItems);
+        throw new Error('Cart is empty');
+      }
+
+      const orderData = {
+        userId: user._id || user.id,
+        items: cartData.items, // use backend cart items
+        deliveryInfo,
+        deliveryOption,
+        deliveryDate,
+        deliveryTime,
+        paymentMethod,
+        totals: {
+          subtotal: cartTotal,
+          shipping,
+          tax,
+          total: orderTotal
+        }
+      };
+
+      const response = await fetch(`${backendUrl}/api/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to place order');
+      }
+
+      const data = await response.json();
       toast.success('Order placed successfully!');
-      // Optionally redirect or show order details
-    } catch {
-      toast.error('Network error');
+      clearCart();
+      navigate('/account', {
+        state: {
+          orderPlaced: true,
+          orderId: data.orderId
+        }
+      });
+
+    } catch (error) {
+      console.error('Order error:', error);
+      toast.error(error.message || 'Error placing order');
+    } finally {
+      setIsLoading(false);
     }
-    setPlacingOrder(false);
   };
 
   return (
@@ -438,7 +488,7 @@ const CheckoutPage = () => {
                             <span className="block font-medium text-gray-800">Express Delivery</span>
                             <span className="block text-sm text-gray-500">Same-day delivery (order before 2PM)</span>
                           </div>
-                          <span className="ml-auto font-medium text-gray-800">ksh 128</span>
+                          <span className="ml-auto font-medium text-gray-800">ksh 129</span>
                         </label>
                       </div>
                     </div>
@@ -703,10 +753,12 @@ const CheckoutPage = () => {
                     </button>
                     <button
                       onClick={handlePlaceOrder}
-                      disabled={placingOrder}
-                      className="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-md transition-colors"
+                      disabled={isLoading}
+                      className={`bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-md transition-colors ${
+                        isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                      }`}
                     >
-                      {placingOrder ? 'Placing Order...' : 'Place Order'}
+                      {isLoading ? 'Processing...' : 'Place Order'}
                     </button>
                   </div>
                 </div>

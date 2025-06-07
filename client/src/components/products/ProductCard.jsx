@@ -81,7 +81,7 @@ const ProductCard = ({ product }) => {
             
             {/* Price */}
             <div className="flex items-center mb-3">
-              <span className="font-semibold text-lg text-gray-800">${product.price.toFixed(2)}</span>
+              <span className="font-semibold text-lg text-gray-800">ksh {product.price.toFixed(2)}</span>
               
               {product.discount > 0 && (
                 <span className="ml-2 text-sm text-gray-400 line-through">

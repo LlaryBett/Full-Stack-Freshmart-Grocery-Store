@@ -17,9 +17,9 @@ export const getAllProducts = async (req, res) => {
     let filter = {};
     let sortOption = {};
 
-    // Category filter (case-insensitive, exact match)
+    // Simplified category filter - just use case-insensitive contains
     if (category) {
-      filter.category = { $regex: `^${category}$`, $options: 'i' };
+      filter.category = { $regex: category, $options: 'i' };
     }
 
     // Price filter
@@ -75,14 +75,22 @@ export const getAllProducts = async (req, res) => {
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
 
+    // Debug logs
+    console.log('Query params:', req.query);
+    console.log('Filter:', filter);
+    console.log('Sort:', sortOption);
+
     // Get total count for pagination
     const total = await Product.countDocuments(filter);
+    console.log('Total matching documents:', total);
 
     // Get paginated results
     const products = await Product.find(filter)
       .sort(sortOption)
       .skip(skip)
       .limit(limitNum);
+
+    console.log('Found products:', products.length);
 
     res.json({
       products,
@@ -93,6 +101,7 @@ export const getAllProducts = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Product search error:', error);
     res.status(500).json({ message: 'Error fetching products' });
   }
 };

@@ -8,9 +8,7 @@ const FeaturedCategories = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Use Vite environment variables
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_CLIENT_URL;
-    fetch(`${backendUrl}/api/categories`)
+    fetch('http://localhost:5000/api/categories')
       .then(res => res.json())
       .then(data => {
         setCategories(data);

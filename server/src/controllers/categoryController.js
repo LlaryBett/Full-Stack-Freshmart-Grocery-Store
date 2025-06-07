@@ -4,15 +4,18 @@ import Product from '../models/Product.js';
 export const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.find({});
-    // For each category, count products in that category (case-insensitive)
+    // Count products using category name instead of id
     const categoriesWithCount = await Promise.all(
       categories.map(async (cat) => {
-        const productCount = await Product.countDocuments({ category: { $regex: `^${cat.id}$`, $options: 'i' } });
+        const productCount = await Product.countDocuments({
+          category: { $regex: `^${cat.name}$`, $options: 'i' }
+        });
         return { ...cat.toObject(), productCount };
       })
     );
     res.json(categoriesWithCount);
   } catch (error) {
+    console.error('Error fetching categories:', error);
     res.status(500).json({ message: 'Error fetching categories' });
   }
 };
@@ -31,7 +34,10 @@ export const getCategoryById = async (req, res) => {
   try {
     const category = await Category.findOne({ id: req.params.id });
     if (!category) return res.status(404).json({ message: 'Category not found' });
-    const productCount = await Product.countDocuments({ category: category.id });
+    // Count products using category name
+    const productCount = await Product.countDocuments({
+      category: { $regex: `^${category.name}$`, $options: 'i' }
+    });
     res.json({ ...category.toObject(), productCount });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching category' });

@@ -7,7 +7,7 @@ import SearchBar from '../ui/SearchBar';
 import CategoryDropdown from './CategoryDropdown';
 
 const Header = ({ toggleCart, toggleMobileMenu }) => {
-  const { cartItems } = useCart();
+  const { cartItems } = useCart(); // Always use this for cart items
   const { user } = useAuth();
   const [wishlistCount, setWishlistCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,7 +42,8 @@ const Header = ({ toggleCart, toggleMobileMenu }) => {
     }
   }, [user, backendUrl]);
 
-  const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  // Calculate cart item count from CartContext
+  const cartItemCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   const isHomePage = location.pathname === '/';
   const headerClass = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
