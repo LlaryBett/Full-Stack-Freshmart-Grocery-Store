@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChart2,
   Users,
@@ -8,11 +8,13 @@ import {
   Settings as SettingsIcon,
   Box,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const navLinks = [
     { label: 'Dashboard', icon: Home, to: '/admin' },
@@ -20,8 +22,14 @@ const Sidebar = () => {
     { label: 'Customers', icon: Users, to: '/admin/customers' },
     { label: 'Inventory', icon: Box, to: '/admin/inventory' },
     { label: 'Orders', icon: ClipboardList, to: '/admin/orders' },
+    { label: 'Promo Events', icon: SettingsIcon, to: '/admin/promo-events' }, // Add this line
     { label: 'Settings', icon: SettingsIcon, to: '/admin/settings' }
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   // Sidebar content
   const sidebarContent = (
@@ -55,6 +63,16 @@ const Sidebar = () => {
             </li>
           ))}
         </ul>
+        {/* Add divider and logout button */}
+        <div className="mt-auto pt-4 border-t border-gray-100 mt-8">
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-2 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Logout
+          </button>
+        </div>
       </nav>
     </aside>
   );

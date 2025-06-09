@@ -34,29 +34,29 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/products" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/products" className="text-gray-600 hover:text-green-500 transition-colors">
                   Shop All
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="#deals" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/deals" className="text-gray-600 hover:text-green-500 transition-colors">
                   Today's Deals
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/account" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/account" className="text-gray-600 hover:text-green-500 transition-colors">
                   My Account
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="#about" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/about" className="text-gray-600 hover:text-green-500 transition-colors">
                   About Us
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="#blog" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/blog" className="text-gray-600 hover:text-green-500 transition-colors">
                   Blog
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -66,29 +66,29 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Customer Service</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="#help" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/help" className="text-gray-600 hover:text-green-500 transition-colors">
                   Help Center
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="#faq" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/faq" className="text-gray-600 hover:text-green-500 transition-colors">
                   FAQ
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="#shipping" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/shipping" className="text-gray-600 hover:text-green-500 transition-colors">
                   Shipping & Delivery
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="#returns" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/returns" className="text-gray-600 hover:text-green-500 transition-colors">
                   Returns & Refunds
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="#privacy" className="text-gray-600 hover:text-green-500 transition-colors">
+                <a href="/privacy" className="text-gray-600 hover:text-green-500 transition-colors">
                   Privacy Policy
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

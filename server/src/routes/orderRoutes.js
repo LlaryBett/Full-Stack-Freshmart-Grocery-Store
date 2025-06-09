@@ -8,19 +8,18 @@ import {
   deleteOrder,
   updateOrder
 } from '../controllers/orderController.js';
-// import { requireAdmin } from '../middleware/auth.js'; // Uncomment if you have admin middleware
 
 const router = express.Router();
 
-// User routes
-router.post('/orders', placeOrder);
-router.get('/orders/user/:userId', getUserOrders);
-router.get('/orders/:id', getOrderById);
+// Admin routes (place these first to avoid conflict with :id route)
+router.get('/', getAllOrders); // Changed from /orders to / for getting all orders
+router.put('/:id/status', updateOrderStatus); // Keep this for updating status
 
-// Admin routes
-router.get('/orders', /* requireAdmin, */ getAllOrders);
-router.put('/orders/:id/status', /* requireAdmin, */ updateOrderStatus);
-router.put('/orders/:id', /* requireAdmin, */ updateOrder);
-router.delete('/orders/:id', /* requireAdmin, */ deleteOrder);
+// User routes (place these after to avoid conflicts)
+router.post('/', placeOrder);
+router.get('/user/:userId', getUserOrders);
+router.get('/:id', getOrderById);
+router.put('/:id', updateOrder);
+router.delete('/:id', deleteOrder);
 
 export default router;

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false }, // add select: false
   createdAt: { type: Date, default: Date.now },
   refreshTokens: [{
     token: String,

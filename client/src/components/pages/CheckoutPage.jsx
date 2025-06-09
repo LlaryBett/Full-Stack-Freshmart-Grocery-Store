@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, CreditCard, MapPin, Calendar, Clock, AlertCircle } from 'lucide-react';
+import { ChevronRight, CreditCard, MapPin, Calendar, Clock, AlertCircle, Mail } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
@@ -27,11 +27,16 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoError, setPromoError] = useState('');
+  const [validatingPromo, setValidatingPromo] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
 
   // Calculate order totals
   const shipping = deliveryOption === 'express' ? 129 : 0;
   const tax = cartTotal * 0.1;
-  const orderTotal = cartTotal + shipping + tax;
+  const orderTotal = cartTotal + shipping + tax - promoDiscount;
 
   // Available delivery dates (next 7 days)
   const deliveryDates = Array.from({ length: 7 }, (_, i) => {
@@ -49,6 +54,9 @@ const CheckoutPage = () => {
     '16:00 - 18:00',
     '18:00 - 20:00'
   ];
+
+  // Define backendUrl once at the top of the component
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
   useEffect(() => {
     // Scroll to top when the component mounts
@@ -135,7 +143,7 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     if (!user || !(user._id || user.id)) {
-      toast.error('Please log in  to place an order!');
+      toast.error('Please log in to place an order!');
       setIsLoading(false);
       return;
     }
@@ -147,9 +155,6 @@ const CheckoutPage = () => {
       if (!token) {
         throw new Error('Authentication required');
       }
-
-      // Use backendUrl here only
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
       // --- Fetch latest cart from backend before placing order ---
       const cartRes = await fetch(`${backendUrl}/api/cart/${user._id || user.id}`, {
@@ -173,11 +178,16 @@ const CheckoutPage = () => {
         deliveryDate,
         deliveryTime,
         paymentMethod,
+        promo: promoCode ? {
+          code: promoCode,
+          discount: promoDiscount
+        } : null,
         totals: {
           subtotal: cartTotal,
           shipping,
           tax,
-          total: orderTotal
+          promoDiscount: promoDiscount,
+          total: orderTotal // This already includes the promo discount
         }
       };
 
@@ -205,11 +215,93 @@ const CheckoutPage = () => {
         }
       });
 
-    } catch (error) {
-      console.error('Order error:', error);
-      toast.error(error.message || 'Error placing order');
+    } catch (err) {
+      console.error('Order error:', err);
+      toast.error(err.message || 'Error placing order');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleApplyPromoCode = async () => {
+    if (!promoCode.trim()) {
+      toast.error('Please enter a promo code');
+      return;
+    }
+
+    if (!deliveryInfo.email) {
+      toast.error('Please enter your email in the delivery information first');
+      return;
+    }
+
+    setValidatingPromo(true);
+    setPromoError('');
+    console.log('Validating promo code:', promoCode);
+    console.log('API URL:', `${backendUrl}/api/promo/validate`);
+
+    try {
+      const response = await fetch(`${backendUrl}/api/promo/validate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          code: promoCode,
+          orderAmount: cartTotal,
+          email: deliveryInfo.email
+        })
+      });
+
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (!response.ok) {
+        setPromoError(data.message);
+        setPromoDiscount(0);
+        toast.error(data.message || 'Invalid promo code');
+        return;
+      }
+
+      // Calculate discount based on type
+      const discount = data.promoCode.discountType === 'percentage' 
+        ? (cartTotal * data.promoCode.discountAmount / 100)
+        : data.promoCode.discountAmount;
+
+      setPromoDiscount(discount);
+      toast.success('Promo code applied successfully!');
+    } catch (err) {
+      console.error('Promo code error:', err);
+      setPromoError('Error validating promo code');
+      setPromoDiscount(0);
+      toast.error('Error validating promo code');
+    } finally {
+      setValidatingPromo(false);
+    }
+  };
+
+  const handleSubscribe = async () => {
+    if (!deliveryInfo.email) {
+      toast.error('Please enter your email in delivery information first');
+      return;
+    }
+
+    setSubscribing(true);
+    try {
+      const response = await fetch(`${backendUrl}/api/promo/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: deliveryInfo.email })
+      });
+
+      if (response.ok) {
+        toast.success('Successfully subscribed for promotional offers!');
+      } else {
+        toast.error('Failed to subscribe');
+      }
+    } finally {
+      setSubscribing(false);
     }
   };
 
@@ -838,19 +930,46 @@ const CheckoutPage = () => {
               
               {/* Promo Code */}
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-medium mb-2">
-                  Promo Code
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-gray-700 text-sm font-medium">
+                    Promo Code
+                  </label>
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={subscribing}
+                    className="text-xs text-green-600 hover:text-green-700 flex items-center gap-1"
+                  >
+                    <Mail size={14} />
+                    {subscribing ? 'Subscribing...' : 'Get Promo Codes'}
+                  </button>
+                </div>
                 <div className="flex">
                   <input
                     type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
                     placeholder="Enter promo code"
                     className="flex-1 border border-gray-300 rounded-l-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
-                  <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-r-md transition-colors">
-                    Apply
+                  <button 
+                    onClick={handleApplyPromoCode}
+                    disabled={validatingPromo || !promoCode.trim()}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-r-md transition-colors disabled:opacity-50"
+                  >
+                    {validatingPromo ? 'Applying...' : 'Apply'}
                   </button>
                 </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Subscribe to receive exclusive promo codes and offers
+                </p>
+                {promoError && (
+                  <p className="text-red-500 text-xs mt-1">{promoError}</p>
+                )}
+                {promoDiscount > 0 && (
+                  <p className="text-green-500 text-xs mt-1">
+                    Discount applied: ksh {promoDiscount.toFixed(2)}
+                  </p>
+                )}
               </div>
             </div>
           </div>

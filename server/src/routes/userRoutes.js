@@ -1,10 +1,9 @@
 import express from 'express';
-import { addToWishlist, removeFromWishlist, getWishlist } from '../controllers/userController.js';
+import {  changePassword } from '../controllers/userController.js';
 
 const router = express.Router();
 
-router.post('/:userId/wishlist', addToWishlist);
-router.delete('/:userId/wishlist/:productId', removeFromWishlist);
-router.get('/:userId/wishlist', getWishlist);
+
+router.post('/:userId/change-password', changePassword);
 
 export default router;

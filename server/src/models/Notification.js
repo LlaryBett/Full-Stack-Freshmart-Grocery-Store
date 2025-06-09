@@ -5,6 +5,7 @@ const notificationSchema = new mongoose.Schema({
   type: { type: String, required: true }, // e.g. 'order', 'promo', 'broadcast'
   message: { type: String, required: true },
   read: { type: Boolean, default: false },
+  hidden: { type: Boolean, default: false }, // <-- add this line
   createdAt: { type: Date, default: Date.now }
 });
 

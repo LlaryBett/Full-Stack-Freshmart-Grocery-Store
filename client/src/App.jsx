@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './components/context/AuthContext';
 import { CartProvider } from './components/context/CartContext';
 import Layout from './components/layout/Layout';
+import DocsLayout from './components/layout/DocsLayout';
 import HomePage from './components/pages/HomePage';
 import ProductsPage from './components/pages/ProductsPage';
 import ProductDetailPage from './components/pages/ProductDetailPage';
@@ -13,6 +14,13 @@ import RegisterPage from './components/pages/RegisterPage';
 import ForgotPassword from './components/pages/ForgotPassword';
 import ResetPassword from './components/pages/ResetPassword';
 import OrderDetailPage from './components/pages/OrderDetailPage';
+import About from './components/pages/About';
+import Blog from './components/pages/Blog';
+import Help from './components/pages/Help';
+import Faq from './components/pages/Faq';
+import Shipping from './components/pages/Shipping';
+import Returns from './components/pages/Returns';
+import Privacy from './components/pages/Privacy';
 import { Toaster } from 'react-hot-toast';
 import Dashboard from './components/pages/admin/Dashboard';
 import Analytics from './components/pages/admin/Analytics';
@@ -20,6 +28,7 @@ import Customers from './components/pages/admin/Customers';
 import Inventory from './components/pages/admin/Inventory';
 import Orders from './components/pages/admin/Orders';
 import Settings from './components/pages/admin/Settings';
+import CreatePromoEvent from './components/pages/admin/CreatePromoEvent';
 
 function App() {
   return (
@@ -27,14 +36,25 @@ function App() {
       <CartProvider>
         <Router>
           <Routes>
-            {/* Admin routes without Layout */}
+            {/* Admin routes */}
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/admin/analytics" element={<Analytics />} />
             <Route path="/admin/customers" element={<Customers />} />
             <Route path="/admin/inventory" element={<Inventory />} />
             <Route path="/admin/orders" element={<Orders />} />
             <Route path="/admin/settings" element={<Settings />} />
-            {/* All other routes with Layout */}
+            <Route path="/admin/promo-events" element={<CreatePromoEvent />} />
+
+            {/* Documentation pages with DocsLayout */}
+            <Route path="/about" element={<DocsLayout><About /></DocsLayout>} />
+            <Route path="/blog" element={<DocsLayout><Blog /></DocsLayout>} />
+            <Route path="/help" element={<DocsLayout><Help /></DocsLayout>} />
+            <Route path="/faq" element={<DocsLayout><Faq /></DocsLayout>} />
+            <Route path="/shipping" element={<DocsLayout><Shipping /></DocsLayout>} />
+            <Route path="/returns" element={<DocsLayout><Returns /></DocsLayout>} />
+            <Route path="/privacy" element={<DocsLayout><Privacy /></DocsLayout>} />
+
+            {/* Main app routes */}
             <Route
               path="*"
               element={

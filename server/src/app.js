@@ -10,6 +10,8 @@ import wishlistRoutes from './routes/wishlistRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import promoCodeRoutes from './routes/promoCodeRoutes.js'; // Add this import
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/promo', promoCodeRoutes); // Register promo code routes
+app.use('/api/users', userRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });

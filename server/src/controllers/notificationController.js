@@ -3,7 +3,11 @@ import NotificationPreference from '../models/NotificationPreference.js';
 
 export const getNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({ user: req.params.userId }).sort({ createdAt: -1 });
+    // Make sure to filter out hidden notifications for this user
+    const notifications = await Notification.find({
+      user: req.params.userId,
+      $or: [{ hidden: { $exists: false } }, { hidden: false }]
+    }).sort({ createdAt: -1 });
     res.json(notifications);
   } catch {
     res.status(500).json({ message: 'Error fetching notifications' });
@@ -71,5 +75,28 @@ export const createNotification = async (userId, type, message, channel = 'push'
   if (await shouldSendNotification(userId, type, channel)) {
     await Notification.create({ user: userId, type, message });
     // Optionally, send email or push notification here as well
+  }
+};
+
+/**
+ * Allow a user to "delete" (hide) a notification for themselves,
+ * but not delete the notification document from the system.
+ * This is done by marking it as "deleted" for that user.
+ */
+export const hideNotificationForUser = async (req, res) => {
+  try {
+    const { userId, notificationId } = req.params;
+    // Only update the notification for this user, not delete it globally
+    const notification = await Notification.findOneAndUpdate(
+      { _id: notificationId, user: userId },
+      { $set: { hidden: true } }, // Add a "hidden" field
+      { new: true }
+    );
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found for this user' });
+    }
+    res.json({ message: 'Notification hidden for user' });
+  } catch {
+    res.status(500).json({ message: 'Error hiding notification' });
   }
 };

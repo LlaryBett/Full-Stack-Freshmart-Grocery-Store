@@ -31,7 +31,20 @@ const orderSchema = new mongoose.Schema(
       tax: Number,
       total: Number
     },
-    status: { type: String, default: 'pending' }
+    status: { 
+      type: String, 
+      enum: [
+        'pending',          // Initial state when order is placed
+        'confirmed',        // Order is confirmed but not yet processing
+        'processing',       // Order is being prepared
+        'ready',           // Order is ready for delivery/pickup
+        'out_for_delivery', // Order is out for delivery
+        'delivered',        // Order has been delivered
+        'cancelled',        // Order was cancelled
+        'refunded'         // Order was refunded
+      ],
+      default: 'pending'
+    }
   },
   { timestamps: true }
 );

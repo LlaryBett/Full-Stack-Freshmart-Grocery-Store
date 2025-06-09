@@ -10,7 +10,8 @@ import {
   LogOut, 
   Check,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -132,8 +133,9 @@ const AccountPage = () => {
         .then(res => res.json())
         .then(data => {
           const notifs = Array.isArray(data) ? data : [];
-          setNotifications(notifs);
-          setUnreadNotifications(notifs.filter(n => !n.read).length);
+          // Filter out hidden notifications here
+          setNotifications(notifs.filter(n => !n.hidden));
+          setUnreadNotifications(notifs.filter(n => !n.read && !n.hidden).length);
         })
         .catch(() => {
           setNotifications([]);
@@ -151,11 +153,17 @@ const AccountPage = () => {
         .then(res => res.json())
         .then(data => {
           const notifs = Array.isArray(data) ? data : [];
-          setUnreadNotifications(notifs.filter(n => !n.read).length);
+          // Filter out hidden notifications here
+          setUnreadNotifications(notifs.filter(n => !n.read && !n.hidden).length);
         })
         .catch(() => setUnreadNotifications(0));
     }
   }, [user, backendUrl]);
+
+  // Update unreadNotifications count when notifications change
+  useEffect(() => {
+    setUnreadNotifications(notifications.filter(n => !n.read && !n.hidden).length);
+  }, [notifications]);
 
   const handleLoginChange = e => {
     setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
@@ -510,8 +518,7 @@ const AccountPage = () => {
               {activeTab === 'profile' && (
                 <div>
                   <h2 className="text-xl font-semibold text-gray-800 mb-6">Profile Information</h2>
-                  
-                  <form className="space-y-6">
+                  <div className="mb-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-gray-700 text-sm font-medium mb-1">
@@ -519,45 +526,80 @@ const AccountPage = () => {
                         </label>
                         <input
                           type="text"
-                          defaultValue={user.firstName}
-                          className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          value={user.firstName}
+                          className="w-full border border-gray-300 rounded-md py-2 px-3 bg-gray-100"
+                          disabled
                         />
                       </div>
-                      
                       <div>
                         <label className="block text-gray-700 text-sm font-medium mb-1">
                           Last Name
                         </label>
                         <input
                           type="text"
-                          defaultValue={user.lastName}
-                          className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          value={user.lastName}
+                          className="w-full border border-gray-300 rounded-md py-2 px-3 bg-gray-100"
+                          disabled
                         />
                       </div>
-                      
                       <div>
                         <label className="block text-gray-700 text-sm font-medium mb-1">
                           Email Address
                         </label>
                         <input
                           type="email"
-                          defaultValue={user.email}
-                          className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          value={user.email}
+                          className="w-full border border-gray-300 rounded-md py-2 px-3 bg-gray-100"
+                          disabled
                         />
                       </div>
-                      
                       <div>
                         <label className="block text-gray-700 text-sm font-medium mb-1">
                           Phone Number
                         </label>
                         <input
                           type="tel"
-                          defaultValue={user.phone}
-                          className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          value={user.phone}
+                          className="w-full border border-gray-300 rounded-md py-2 px-3 bg-gray-100"
+                          disabled
                         />
                       </div>
                     </div>
-                    
+                  </div>
+                  {/* Password change form only */}
+                  <form
+                    className="space-y-6"
+                    onSubmit={async e => {
+                      e.preventDefault();
+                      const formData = new FormData(e.target);
+                      const currentPassword = formData.get('currentPassword');
+                      const newPassword = formData.get('newPassword');
+                      if (!currentPassword || !newPassword) {
+                        toast.error('Both fields are required.');
+                        return;
+                      }
+                      try {
+                        const res = await fetch(`${backendUrl}/api/users/${user._id || user.id}/change-password`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                          },
+                          body: JSON.stringify({
+                            currentPassword,
+                            newPassword
+                          })
+                        });
+                        if (!res.ok) {
+                          const data = await res.json();
+                          throw new Error(data.message || 'Failed to change password');
+                        }
+                        toast.success('Password changed!');
+                      } catch (err) {
+                        toast.error(err.message || 'Could not change password');
+                      }
+                    }}
+                  >
                     <div>
                       <h3 className="font-medium text-gray-700 mb-3">Change Password</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -567,7 +609,9 @@ const AccountPage = () => {
                           </label>
                           <input
                             type="password"
+                            name="currentPassword"
                             className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            autoComplete="current-password"
                           />
                         </div>
                         
@@ -577,18 +621,22 @@ const AccountPage = () => {
                           </label>
                           <input
                             type="password"
+                            name="newPassword"
                             className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            autoComplete="new-password"
                           />
                         </div>
                       </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        To change your password, fill both fields and save changes.
+                      </p>
                     </div>
-                    
                     <div className="flex justify-end">
                       <button
                         type="submit"
                         className="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-md transition-colors"
                       >
-                        Save Changes
+                        Change Password
                       </button>
                     </div>
                   </form>
@@ -1073,7 +1121,9 @@ const AccountPage = () => {
                       <div className="text-gray-500">No notifications yet.</div>
                     ) : (
                       <div className="space-y-4">
-                        {notifications.map(n => (
+                        {notifications
+                          .filter(n => !n.hidden) // Hide notifications marked as hidden
+                          .map(n => (
                           <div
                             key={n._id}
                             className={`border rounded-lg p-4 flex items-start space-x-3 ${n.read ? 'bg-gray-50' : 'bg-green-50'}`}
@@ -1089,11 +1139,12 @@ const AccountPage = () => {
                                     onClick={async () => {
                                       try {
                                         await fetch(`${backendUrl}/api/notifications/${user._id || user.id}/${n._id}/read`, {
-                                          method: 'PUT'
+                                          method: 'PATCH' // Use PATCH instead of PUT
                                         });
                                         setNotifications(notifications.map(x =>
                                           x._id === n._id ? { ...x, read: true } : x
                                         ));
+                                        // Unread badge will update via useEffect above
                                       } catch {
                                         toast.error('Could not mark as read');
                                       }
@@ -1102,6 +1153,25 @@ const AccountPage = () => {
                                     Mark as read
                                   </button>
                                 )}
+                                <button
+                                  className="ml-4 text-red-500 hover:text-red-700 text-xs flex items-center"
+                                  title="Delete notification"
+                                  onClick={async () => {
+                                    try {
+                                      await fetch(`${backendUrl}/api/notifications/${user._id || user.id}/${n._id}/hide`, {
+                                        method: 'PATCH'
+                                      });
+                                      setNotifications(notifications.filter(x => x._id !== n._id));
+                                      toast.success('Notification deleted');
+                                      // Unread badge will update via useEffect above
+                                    } catch {
+                                      toast.error('Could not delete notification');
+                                    }
+                                  }}
+                                >
+                                  <Trash2 size={14} className="mr-1" />
+                                  Delete
+                                </button>
                               </div>
                             </div>
                           </div>
