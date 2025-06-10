@@ -256,7 +256,7 @@ const ProductDetailPage = () => {
             </div>
             {/* Price */}
             <div className="flex items-center mb-6">
-              <span className="text-3xl font-bold text-gray-800">${product.price?.toFixed(2)}</span>
+              <span className="text-3xl font-bold text-gray-800">ksh {product.price?.toFixed(2)}</span>
               {product.discount > 0 && (
                 <span className="ml-3 text-lg text-gray-400 line-through">
                   ${(product.price * (1 + product.discount / 100)).toFixed(2)}

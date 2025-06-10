@@ -31,9 +31,9 @@ export const login = async (req, res) => {
     const user = await User.findOne({
       $or: [
         { email: email },
-        { phone: email }  // checking the email field against phone numbers too
+        { phone: email }
       ]
-    });
+    }).select('+password'); // <-- ADD THIS
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
