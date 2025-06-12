@@ -11,24 +11,27 @@ import {
   X,
   LogOut
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
   const navLinks = [
     { label: 'Dashboard', icon: Home, to: '/admin' },
     { label: 'Analytics', icon: BarChart2, to: '/admin/analytics' },
     { label: 'Customers', icon: Users, to: '/admin/customers' },
     { label: 'Inventory', icon: Box, to: '/admin/inventory' },
     { label: 'Orders', icon: ClipboardList, to: '/admin/orders' },
-    { label: 'Promo Events', icon: SettingsIcon, to: '/admin/promo-events' }, // Add this line
+    { label: 'Promo CRUD', icon: SettingsIcon, to: '/admin/promos' }, // Add this line
+    { label: 'Promo Events', icon: SettingsIcon, to: '/admin/promo-events' },
     { label: 'Settings', icon: SettingsIcon, to: '/admin/settings' }
   ];
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/login');
+    navigate('/'); // Redirect to homepage
   };
 
   // Sidebar content

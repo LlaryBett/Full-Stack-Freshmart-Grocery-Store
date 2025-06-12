@@ -324,7 +324,7 @@ const ProductDetailPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-md">
                 <Truck className="text-green-500" size={20} />
-                <span className="text-sm">Free delivery over $50</span>
+                <span className="text-sm">Free delivery over ksh 1000</span>
               </div>
               <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-md">
                 <RefreshCw className="text-green-500" size={20} />

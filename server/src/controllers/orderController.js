@@ -5,6 +5,7 @@ import { sendDeliveryEmail } from '../utils/emailService.js';
 import { isWorkingHours } from '../utils/timeUtils.js';
 import { subscribePromo, assignWelcomePromoIfFirstTime, assignPromoForEvent } from './promoCodeController.js'; // Import the promo logic
 import PromoEvent from '../models/PromoEvent.js';
+import { checkAndUpdateStock } from './productController.js';
 
 export const placeOrder = async (req, res) => {
   const { 
@@ -63,6 +64,15 @@ export const placeOrder = async (req, res) => {
 
     if (!items.length) {
       return res.status(400).json({ message: 'Cart is empty' });
+    }
+
+    // --- STOCK CHECK AND UPDATE ---
+    for (const item of items) {
+      try {
+        await checkAndUpdateStock(item.product, item.quantity);
+      } catch (err) {
+        return res.status(400).json({ message: `Insufficient stock for product: ${item.product}` });
+      }
     }
 
     const shipping = deliveryOption === 'express' ? 129 : 0;

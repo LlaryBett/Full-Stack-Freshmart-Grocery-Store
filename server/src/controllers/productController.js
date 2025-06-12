@@ -210,3 +210,18 @@ export const addRating = async (req, res) => {
     res.status(500).json({ message: 'Failed to add rating' });
   }
 };
+
+// Add this utility for stock check and update
+export const checkAndUpdateStock = async (productId, quantity) => {
+  // Find the product and update stock atomically
+  const product = await Product.findOneAndUpdate(
+    { _id: productId, stock: { $gte: quantity } },
+    { $inc: { stock: -quantity } },
+    { new: true }
+  );
+  if (!product) throw new Error('Insufficient stock or product not found');
+  return product;
+};
+
+// Example usage in your order controller (not shown here):
+// await checkAndUpdateStock(productId, quantity);

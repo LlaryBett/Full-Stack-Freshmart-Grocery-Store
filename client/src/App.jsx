@@ -29,6 +29,7 @@ import Inventory from './components/pages/admin/Inventory';
 import Orders from './components/pages/admin/Orders';
 import Settings from './components/pages/admin/Settings';
 import CreatePromoEvent from './components/pages/admin/CreatePromoEvent';
+import PromoCrudPage from './components/pages/admin/PromoCrudPage';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
             <Route path="/admin/orders" element={<Orders />} />
             <Route path="/admin/settings" element={<Settings />} />
             <Route path="/admin/promo-events" element={<CreatePromoEvent />} />
+            <Route path="/admin/promos" element={<PromoCrudPage />} />
 
             {/* Documentation pages with DocsLayout */}
             <Route path="/about" element={<DocsLayout><About /></DocsLayout>} />
