@@ -8,7 +8,8 @@ const FeaturedCategories = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/categories')
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    fetch(`${backendUrl}/api/categories`)
       .then(res => res.json())
       .then(data => {
         setCategories(data);
