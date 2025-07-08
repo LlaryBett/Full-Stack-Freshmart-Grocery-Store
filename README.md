@@ -2,7 +2,7 @@
 
 A full-stack e-commerce grocery store application built with React.js (Frontend) and Node.js/Express (Backend), featuring modern UI/UX design and comprehensive shopping functionality.
 
-**Live Preview:** https://freshmart-grocery-store.vercel.app
+**Live Preview:** https://full-stack-freshmart-grocery-store.vercel.app/
 
 ## 📸 Screenshots
 
