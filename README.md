@@ -95,7 +95,7 @@ grocery-store/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/grocery-store.git
+  https://github.com/LlaryBett/Full-Stack-Freshmart-Grocery-Store.git
    cd grocery-store
    ```
 
