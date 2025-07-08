@@ -8,7 +8,7 @@ const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filteredProducts, setFilteredProducts] = useState([]); // Initialize as empty array
   const [categories, setCategories] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 100]);
+  const [priceRange, setPriceRange] = useState([0, 1500]);
   const [sortBy, setSortBy] = useState('featured');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -43,8 +43,8 @@ const ProductsPage = () => {
       url += (url.endsWith('?') ? '' : '&') + `search=${encodeURIComponent(searchParam)}`;
     }
 
-    if (priceRange[0] > 0) url += (url.endsWith('?') ? '' : '&') + `minPrice=ksh {priceRange[0]}`;
-    if (priceRange[1] < 1500) url += (url.endsWith('?') ? '' : '&') + `maxPrice=ksh {priceRange[1]}`;
+    if (priceRange[0] > 0) url += (url.endsWith('?') ? '' : '&') + `minPrice=${priceRange[0]}`;
+    if (priceRange[1] < 1500) url += (url.endsWith('?') ? '' : '&') + `maxPrice=${priceRange[1]}`;
 
     if (sortBy && sortBy !== 'featured') url += (url.endsWith('?') ? '' : '&') + `sort=${sortBy}`;
 
@@ -157,13 +157,13 @@ const ProductsPage = () => {
                 <h3 className="font-semibold text-gray-800 mb-4">Price Range</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">${priceRange[0]}</span>
-                    <span className="text-gray-600">${priceRange[1]}</span>
+                    <span className="text-gray-600">ksh{priceRange[0]}</span>
+                    <span className="text-gray-600">ksh{priceRange[1]}</span>
                   </div>
                   <input 
                     type="range" 
                     min="0" 
-                    max="100" 
+                    max="1500" 
                     value={priceRange[1]} 
                     onChange={(e) => handlePriceChange([priceRange[0], parseInt(e.target.value)])}
                     className="w-full accent-green-500"
@@ -260,13 +260,13 @@ const ProductsPage = () => {
                   <h4 className="font-medium text-gray-800 mb-3">Price Range</h4>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600">${priceRange[0]}</span>
-                      <span className="text-gray-600">${priceRange[1]}</span>
+                      <span className="text-gray-600">ksh{priceRange[0]}</span>
+                      <span className="text-gray-600">ksh{priceRange[1]}</span>
                     </div>
                     <input 
                       type="range" 
                       min="0" 
-                      max="100" 
+                      max="1500" 
                       value={priceRange[1]} 
                       onChange={(e) => handlePriceChange([priceRange[0], parseInt(e.target.value)])}
                       className="w-full accent-green-500"
