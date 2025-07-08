@@ -43,8 +43,8 @@ const ProductsPage = () => {
       url += (url.endsWith('?') ? '' : '&') + `search=${encodeURIComponent(searchParam)}`;
     }
 
-    if (priceRange[0] > 0) url += (url.endsWith('?') ? '' : '&') + `minPrice=${priceRange[0]}`;
-    if (priceRange[1] < 100) url += (url.endsWith('?') ? '' : '&') + `maxPrice=${priceRange[1]}`;
+    if (priceRange[0] > 0) url += (url.endsWith('?') ? '' : '&') + `minPrice=ksh {priceRange[0]}`;
+    if (priceRange[1] < 1500) url += (url.endsWith('?') ? '' : '&') + `maxPrice=ksh {priceRange[1]}`;
 
     if (sortBy && sortBy !== 'featured') url += (url.endsWith('?') ? '' : '&') + `sort=${sortBy}`;
 
