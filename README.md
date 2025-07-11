@@ -30,7 +30,7 @@ A full-stack e-commerce grocery store application built with React.js (Frontend)
 - **📂 Category Management**: Manage product categories
 - **🎯 Promotion Management**: Create and manage promotional campaigns
 - **👥 User Management**: View and manage customer accounts
-- **📈 Analytics**: Sales reports and inventory tracking
+- **📈 Analytics**: Equiped with Sales reports and inventory tracking
 
 ## 🛠️ Technology Stack
 
